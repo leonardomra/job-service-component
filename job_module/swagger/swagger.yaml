@@ -1,0 +1,354 @@
+openapi: 3.0.0
+info:
+  title: Job.ai API
+  description: The OpenResearch API (OR-API) provides users with machine learning-powered
+    NLP tools for scientific text analysis and exploration. In addition to allowing
+    the training of custom models with custom data, the OR-API enables users to integrate
+    the insights from the analysis into dashboards and applications.
+  termsOfService: http://
+  contact:
+    name: OpenResearch COVID-19 GbR
+    url: https://openresearch.cloud
+    email: contact@openresearch.cloud
+  license:
+    name: Apache License - Version 2.0, January 2004
+    url: http://www.apache.org/licenses//
+  version: 1.0.0
+#servers:
+#- url: https://virtserver.swaggerhub.com/openresearch/job-ai/1.0.0
+#  description: SwaggerHub API Auto Mocking
+paths:
+  /jobs:
+    get:
+      tags:
+      - jobs
+      description: Obtain information about jobs.
+      operationId: jobs_get
+      parameters:
+      - name: limit
+        in: query
+        description: The amount of jobs to be returned.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          example: 10
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+                x-content-type: application/json
+        "400":
+          description: invalid input, object invalid
+        "409":
+          description: an item already exists
+      x-openapi-router-controller: job_module.controllers.jobs_controller
+    post:
+      tags:
+      - jobs
+      description: Create a new job.
+      operationId: jobs_post
+      parameters:
+      - name: label
+        in: header
+        description: Label of job.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Topic modeling CORD-19.
+      - name: description
+        in: header
+        description: Description of job.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Model trained on 40k scientific papers about COVID-19.
+      - name: kind
+        in: header
+        description: Type of job.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: tml
+          enum:
+          - tml
+          - d2v
+          - qna
+      - name: model
+        in: header
+        description: Model of AI Task.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      - name: dataSource
+        in: header
+        description: Data source for training AI model.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      - name: dataSample
+        in: header
+        description: Data sample to be analysed with AI model.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      - name: task
+        in: header
+        description: Type of AI Task.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: analyse
+          enum:
+          - train
+          - analyse
+      - name: user
+        in: header
+        description: Id of user.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      - name: status
+        in: header
+        description: Status of task.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: training
+          default: waiting
+          enum:
+          - cancelled
+          - waiting
+          - training
+          - analysing
+          - completed
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+      x-openapi-router-controller: job_module.controllers.jobs_controller
+  /jobs/{id}:
+    get:
+      tags:
+      - jobs
+      description: Obtain information about a specific job.
+      operationId: jobs_id_get
+      parameters:
+      - name: id
+        in: path
+        description: Id of job.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+      x-openapi-router-controller: job_module.controllers.jobs_controller
+    put:
+      tags:
+      - jobs
+      description: Modify a new job.
+      operationId: jobs_id_put
+      parameters:
+      - name: id
+        in: path
+        description: Id of job.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      - name: label
+        in: header
+        description: Label of job.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Topic modeling CORD-19.
+      - name: description
+        in: header
+        description: Description of job.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Model trained on 40k scientific papers about COVID-19.
+      - name: status
+        in: header
+        description: Status of job.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: training
+          enum:
+          - cancelled
+          - waiting
+          - training
+          - analysing
+          - completed
+      - name: output
+        in: header
+        description: Results of job.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+      x-openapi-router-controller: job_module.controllers.jobs_controller
+    delete:
+      tags:
+      - jobs
+      description: Delete a job.
+      operationId: jobs_id_delete
+      parameters:
+      - name: id
+        in: path
+        description: Id of job.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+      x-openapi-router-controller: job_module.controllers.jobs_controller
+components:
+  schemas:
+    Job:
+      required:
+      - dateCreated
+      - dateModified
+      - id
+      - kind
+      - label
+      - status
+      - user
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        user:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        label:
+          type: string
+          example: Topic modeling CORD-19.
+        description:
+          type: string
+          example: Model trained on 40k scientific papers about COVID-19.
+        kind:
+          type: string
+          example: tml
+        model:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        dataSource:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        dataSample:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        status:
+          type: string
+          example: waiting
+        output:
+          type: string
+          format: uuid
+          example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        dateCreated:
+          type: string
+          format: date-time
+          example: 2017-07-21T17:32:28Z
+        dateModified:
+          type: string
+          format: date-time
+          example: 2017-07-21T17:32:28Z
+      description: Model of a job.
+      example:
+        output: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        dateCreated: 2017-07-21T17:32:28Z
+        kind: tml
+        description: Model trained on 40k scientific papers about COVID-19.
+        model: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        dateModified: 2017-07-21T17:32:28Z
+        id: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        label: Topic modeling CORD-19.
+        dataSample: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        user: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        dataSource: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        status: waiting
+

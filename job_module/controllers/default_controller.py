@@ -13,4 +13,5 @@ def health_get():  # noqa: E501
 
     :rtype: Health
     """
+    print('Got health request!')
     return 'Job Service Component is up!'

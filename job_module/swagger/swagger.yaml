@@ -18,6 +18,18 @@ info:
 #- url: https://virtserver.swaggerhub.com/openresearch/job-ai/1.0.0
 #  description: SwaggerHub API Auto Mocking
 paths:
+  /health:
+    get:
+      description: 'Check health of service.'
+      operationId: health_get
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+      x-openapi-router-controller: job_module.controllers.default_controller    
   /jobs:
     get:
       tags:
@@ -282,6 +294,11 @@ paths:
       x-openapi-router-controller: job_module.controllers.jobs_controller
 components:
   schemas:
+    Health:
+      type: object
+      properties:
+        status:
+          format: string
     Job:
       required:
       - dateCreated

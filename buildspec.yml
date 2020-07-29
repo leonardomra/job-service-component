@@ -20,8 +20,8 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:latest
-      #- printf '[{"name":"artfx-api-ecs-container","imageUri":"%s"}]' "$REPOSITORY_URI:$IMAGE_TAG" > imagedefinitions.json
+      - printf '[{"name":"artfx-api-ecs-container","imageUri":"%s"}]' "$REPOSITORY_URI:$IMAGE_TAG" > imagedefinitions.json
 
-#artifacts:
-#  files:
-#    - imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json

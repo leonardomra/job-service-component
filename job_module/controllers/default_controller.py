@@ -47,7 +47,7 @@ def health_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=Non
     response = {
         "status" : body
     }
-    print(response, flush=True)
+    print(body, flush=True)
     x_amz_sns_message_id = connexion.request.headers['x_amz_sns_message_id']
     x_amz_sns_topic_arn = connexion.request.headers['x_amz_sns_topic_arn']
-    return topicSNS.confirmSubscription(x_amz_sns_topic_arn, x_amz_sns_message_id)
+    return topicSNS.confirmSubscription(body['TopicArn'], body['Token'])

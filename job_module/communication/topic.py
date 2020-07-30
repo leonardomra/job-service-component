@@ -24,3 +24,8 @@ class Topic():
         # Print out the response
         print(response)
 
+    def confirmSubscription(self, topicArn, token):
+        return self.client.confirm_subscription(
+            TopicArn = topicArn,
+            Token = token,
+        )

@@ -2,10 +2,13 @@ import connexion
 import sys
 import six
 import json
+
 from job_module.models.health import Health  # noqa: E501
 from job_module import util
-
+from job_module.communication.topic import Topic
 from flask import jsonify
+
+topicSNS = Topic()
 
 def health_get():  # noqa: E501
     """health_get
@@ -41,8 +44,10 @@ def health_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=Non
         body = object.from_dict(connexion.request.get_json())  # noqa: E501
     else:
         body =  json.loads(body)
-    
     response = {
         "status" : body
     }
-    return response
+    print(response, flush=True)
+    x_amz_sns_message_id = connexion.request.headers['x_amz_sns_message_id']
+    x_amz_sns_topic_arn = connexion.request.headers['x_amz_sns_topic_arn']
+    return topicSNS.confirmSubscription(x_amz_sns_topic_arn, x_amz_sns_message_id)

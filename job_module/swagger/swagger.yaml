@@ -18,6 +18,68 @@ info:
 #- url: https://virtserver.swaggerhub.com/openresearch/job-ai/1.0.0
 #  description: SwaggerHub API Auto Mocking
 paths:
+  /health:
+    get:
+      description: 'Check health of service.'
+      operationId: health_get
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+      x-openapi-router-controller: job_module.controllers.default_controller
+    post:
+      description: Check health of subscription.
+      operationId: health_post
+      parameters:
+      - name: x_amz_sns_message_type
+        in: header
+        description: The type of message. The possible values are SubscriptionConfirmation,
+          Notification, and UnsubscribeConfirmation.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: SubscriptionConfirmation
+      - name: x_amz_sns_message_id
+        in: header
+        description: A Universally Unique Identifier, unique for each message published.
+          For a notification that Amazon SNS resends during a retry, the message ID
+          of the original message is used.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: 165545c9-2a5c-472c-8df2-7ff2be2b3b1b
+      - name: x_amz_sns_topic_arn
+        in: header
+        description: The Amazon Resource Name (ARN) for the topic that this message
+          was published to.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: arn:aws:sns:us-west-2:123456789012:MyTopic
+      requestBody:
+        description: The subscription confirmation message is a POST message with
+          a message body that contains a JSON document with name-value pairs.
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+      x-openapi-router-controller: job_module.controllers.default_controller
   /jobs:
     get:
       tags:
@@ -282,6 +344,11 @@ paths:
       x-openapi-router-controller: job_module.controllers.jobs_controller
 components:
   schemas:
+    Health:
+      type: object
+      properties:
+        status:
+          format: string
     Job:
       required:
       - dateCreated

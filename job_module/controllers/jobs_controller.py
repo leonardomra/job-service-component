@@ -1,14 +1,12 @@
 import connexion
 import six
-
+import os
 from flask import jsonify
 
 from job_module.models.job import Job  # noqa: E501
 from job_module import util
 from job_module.dbhandler.mysql_handler import MySQLHandler
 from job_module.communication.topic import Topic
-
-from decouple import config as env
 
 import uuid
 import time  
@@ -153,7 +151,7 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
             return 'For training jobs, a model and sample should be passed with correct UUID.', 406 
 
     # store persistent data
-    db = MySQLHandler(env('MYSQL_USER'), env('MYSQL_PASSWORD'), env('MYSQL_HOST'), env('MYSQL_DATABASE'))
+    db = MySQLHandler(os.environ['MYSQL_USER'], os.environ['MYSQL_PASSWORD'], os.environ['MYSQL_HOST'], os.environ['MYSQL_DATABASE'])
     add_job = ("INSERT INTO Job "
                "(description, kind, label, status, user, id, task, model, dataSample, dataSource) "
                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")

@@ -1,5 +1,4 @@
 import mysql.connector
-from decouple import config as env
 
 class MySQLHandler():
     

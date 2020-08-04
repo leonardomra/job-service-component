@@ -67,3 +67,4 @@ target/
 *.env
 .env
 environment.txt
+run.sh

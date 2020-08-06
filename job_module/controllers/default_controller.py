@@ -10,8 +10,8 @@ from orcomm_module.orcommunicator import ORCommunicator
 
 orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
 
-def health_get():  # noqa: E501
-    """health_get
+def jobs_health_get():  # noqa: E501
+    """jobs_health_get
 
     Check health of service. # noqa: E501
 
@@ -24,8 +24,8 @@ def health_get():  # noqa: E501
     print('Heatlh check executed.', flush=True)
     return jsonify(response)
 
-def health_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=None, x_amz_sns_topic_arn=None):  # noqa: E501
-    """health_post
+def topic_confirm_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=None, x_amz_sns_topic_arn=None):  # noqa: E501
+    """topic_confirm_post
 
     Check health of subscription. # noqa: E501
 

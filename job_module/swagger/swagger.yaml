@@ -18,10 +18,10 @@ info:
 #- url: https://virtserver.swaggerhub.com/openresearch/job-ai/1.0.0
 #  description: SwaggerHub API Auto Mocking
 paths:
-  /health:
+  /jobs/health:
     get:
       description: 'Check health of service.'
-      operationId: health_get
+      operationId: jobs_health_get
       responses:
         "200":
           description: Success
@@ -30,9 +30,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
       x-openapi-router-controller: job_module.controllers.default_controller
+  /topic/confirm:  
     post:
       description: Check health of subscription.
-      operationId: health_post
+      operationId: topic_confirm_post
       parameters:
       - name: x_amz_sns_message_type
         in: header

@@ -1,18 +1,18 @@
 import connexion
 import six
 import os
+import uuid
+import time
 from flask import jsonify
-
 from job_module.models.job import Job  # noqa: E501
 from job_module import util
 from job_module.dbhandler.mysql_handler import MySQLHandler
-from job_module.communication.topic import Topic
-
-import uuid
-import time  
+from orcomm_module.orevent import OREvent 
+from orcomm_module.orcommunicator import ORCommunicator
 
 
-topicSNS = Topic()
+orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
+
 
 def jobs_get(limit=None):  # noqa: E501
     """jobs_get
@@ -158,8 +158,11 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     data_job = (job.description, job.kind, job.label, job.status, job.user, job.id, job.task, job.model, job.data_sample, job.data_source)
     db.add(add_job, data_job)
     
-    
-    topicSNS.broadcastEvent({ "msg": "hello world!" })
+    event = OREvent()
+    event.TopicArn = os.environ['JOBS_ARN_TOPIC']
+    event.Subject = 'Send Job'
+    event.Message = jsonify(job)
+    response = orcomm.topic.broadcastEvent(event)
 
     # response
     return jsonify(job)

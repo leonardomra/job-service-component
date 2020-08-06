@@ -2,13 +2,13 @@ import connexion
 import sys
 import six
 import json
-
+import os
 from job_module.models.health import Health  # noqa: E501
 from job_module import util
-from job_module.communication.topic import Topic
 from flask import jsonify
+from orcomm_module.orcommunicator import ORCommunicator
 
-topicSNS = Topic()
+orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
 
 def health_get():  # noqa: E501
     """health_get
@@ -44,10 +44,16 @@ def health_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=Non
         body = object.from_dict(connexion.request.get_json())  # noqa: E501
     else:
         body =  json.loads(body)
-    response = {
-        "status" : body
-    }
+    
+    print(connexion.request.headers, flush=True)
     print(body, flush=True)
-    x_amz_sns_message_id = connexion.request.headers['x_amz_sns_message_id']
-    x_amz_sns_topic_arn = connexion.request.headers['x_amz_sns_topic_arn']
-    return topicSNS.confirmSubscription(body['TopicArn'], body['Token'])
+    
+    response = orcomm.topic.tuneTopic(connexion.request.headers, body)
+    if response.Type == 'SubscriptionConfirmation':
+        return orcomm.topic.confirmSubscription(response)
+    elif response.Type == 'Notification':
+        response.Subject = 'my subject'
+        response.Message = {'message': 'this is my message'}
+        return orcomm.topic.broadcastEvent(response)
+    elif response.Type == 'UnsubscribeConfirmation':
+         return orcomm.topic.unsubscribe(response)

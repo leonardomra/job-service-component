@@ -3,6 +3,7 @@ import six
 import os
 import uuid
 import time
+import json
 from flask import jsonify
 from job_module.models.job import Job  # noqa: E501
 from job_module import util
@@ -158,14 +159,20 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     data_job = (job.description, job.kind, job.label, job.status, job.user, job.id, job.task, job.model, job.data_sample, job.data_source)
     db.add(add_job, data_job)
     
+    
+    
+    jobDict = job.__dict__.copy()
+    del jobDict['swagger_types']
+    del jobDict['attribute_map']
+    print(jobDict, flush=True)
     event = OREvent()
     event.TopicArn = os.environ['JOBS_ARN_TOPIC']
     event.Subject = 'Send Job'
-    event.Message = jsonify(job)
+    event.Message = json.dumps(jobDict)
     response = orcomm.topic.broadcastEvent(event)
 
     # response
-    return jsonify(job)
+    return response
 
 
 def isValidUUID(val):

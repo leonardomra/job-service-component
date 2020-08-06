@@ -8,14 +8,14 @@ class ORTopic():
         self.client = _client
 
     def broadcastEvent(self, response):
-        self.client.publish(
+        sns = self.client.publish(
             TopicArn=response.TopicArn,
             Subject=response.Subject,
-            Message=json.dumps(response.Message),
+            Message=json.dumps({ "default": response.Message }),
             MessageStructure=response.MessageStructure
         )
         return jsonify(response.summarize())
-
+    
     def tuneTopic(self, headers, body):        
         e = OREvent()
         if 'x-amz-sns-message-type' in headers:

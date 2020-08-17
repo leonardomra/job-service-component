@@ -40,20 +40,16 @@ def topic_confirm_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message
 
     :rtype: Health
     """
-    if connexion.request.is_json:
-        body = object.from_dict(connexion.request.get_json())  # noqa: E501
-    else:
-        body =  json.loads(body)
-    
-    print(connexion.request.headers, flush=True)
-    print(body, flush=True)
-    
-    response = orcomm.topic.tuneTopic(connexion.request.headers, body)
+
+    if not connexion.request.is_json:
+        body = json.loads(body)
+        if 'Message' in body:
+            try:
+                body['Message'] = json.loads(body['Message'])
+            except json.decoder.JSONDecodeError:
+                print('Message cannot be converted into JSON')
+    response = orcomm.getTopic(os.environ['JOBS_ARN_TOPIC']).tuneTopic(connexion.request.headers, body)
     if response.Type == 'SubscriptionConfirmation':
-        return orcomm.topic.confirmSubscription(response)
-    elif response.Type == 'Notification':
-        response.Subject = 'my subject'
-        response.Message = {'message': 'this is my message'}
-        return orcomm.topic.broadcastEvent(response)
-    elif response.Type == 'UnsubscribeConfirmation':
-         return orcomm.topic.unsubscribe(response)
+        return orcomm.getTopic(os.environ['JOBS_ARN_TOPIC']).confirmSubscription(response)
+    else:
+        return 'bad request!', 400

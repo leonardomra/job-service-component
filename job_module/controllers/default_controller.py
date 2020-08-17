@@ -9,6 +9,7 @@ from flask import jsonify
 from orcomm_module.orcommunicator import ORCommunicator
 
 orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
+orcomm.addTopic(os.environ['JOBS_NAME_TOPIC'], os.environ['JOBS_ARN_TOPIC'])
 
 def jobs_health_get():  # noqa: E501
     """jobs_health_get

@@ -11,8 +11,8 @@ from job_module.dbhandler.mysql_handler import MySQLHandler
 from orcomm_module.orevent import OREvent 
 from orcomm_module.orcommunicator import ORCommunicator
 
-
 orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
+orcomm.addTopic(os.environ['JOBS_NAME_TOPIC'], os.environ['JOBS_ARN_TOPIC'])
 
 
 def jobs_get(limit=None):  # noqa: E501
@@ -159,17 +159,15 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     data_job = (job.description, job.kind, job.label, job.status, job.user, job.id, job.task, job.model, job.data_sample, job.data_source)
     db.add(add_job, data_job)
     
-    
-    
+    # create event
     jobDict = job.__dict__.copy()
     del jobDict['swagger_types']
     del jobDict['attribute_map']
-    print(jobDict, flush=True)
     event = OREvent()
     event.TopicArn = os.environ['JOBS_ARN_TOPIC']
     event.Subject = 'Send Job'
     event.Message = json.dumps(jobDict)
-    response = orcomm.topic.broadcastEvent(event)
+    response = orcomm.getTopic(os.environ['JOBS_ARN_TOPIC']).broadcastEvent(event)
 
     # response
     return response

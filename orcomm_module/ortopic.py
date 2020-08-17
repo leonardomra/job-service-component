@@ -1,21 +1,28 @@
 from orcomm_module.orevent import OREvent 
 from flask import jsonify
 import json
+import boto3
 
 class ORTopic():
 
-    def __init__(self, _client = None):
-        self.client = _client
+    def __init__(self, AWS_REGION=None, AWS_ACCESS_KEY=None, AWS_SECRET_KEY=None, TOPIC_ARN=None):
+        self.sns = boto3.client(
+            'sns',
+            region_name=AWS_REGION,
+            aws_access_key_id=AWS_ACCESS_KEY,
+            aws_secret_access_key=AWS_SECRET_KEY
+        )
+        self.TopicArn = TOPIC_ARN
 
     def broadcastEvent(self, response):
-        sns = self.client.publish(
-            TopicArn=response.TopicArn,
+        self.sns.publish(
+            TopicArn=self.TopicArn,
             Subject=response.Subject,
             Message=json.dumps({ "default": response.Message }),
             MessageStructure=response.MessageStructure
         )
         return jsonify(response.summarize())
-    
+
     def tuneTopic(self, headers, body):        
         e = OREvent()
         if 'x-amz-sns-message-type' in headers:
@@ -45,12 +52,15 @@ class ORTopic():
         return e
 
     def confirmSubscription(self, response):
-        return self.client.confirm_subscription(
-            TopicArn = response.TopicArn,
+        return self.sns.confirm_subscription(
+            TopicArn = self.TopicArn,
             Token = response.Token,
         )
 
     def unsubscribe(self, response):
-        return self.client.unsubscribe(
+        return self.sns.unsubscribe(
             SubscriptionArn = response.SubscriptionArn,
         )
+
+    def getResource(self):
+        return self.sns

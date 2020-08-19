@@ -7,10 +7,11 @@ import json
 from flask import jsonify
 from job_module.models.job import Job  # noqa: E501
 from job_module import util
-from job_module.dbhandler.mysql_handler import MySQLHandler
+from dbhandler.mysql_handler import MySQLHandler
 from orcomm_module.orevent import OREvent 
 from orcomm_module.orcommunicator import ORCommunicator
 
+db = MySQLHandler(os.environ['MYSQL_USER'], os.environ['MYSQL_PASSWORD'], os.environ['MYSQL_HOST'], os.environ['MYSQL_DATABASE'])
 orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
 orcomm.addTopic(os.environ['JOBS_NAME_TOPIC'], os.environ['JOBS_ARN_TOPIC'])
 
@@ -152,7 +153,6 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
             return 'For training jobs, a model and sample should be passed with correct UUID.', 406 
 
     # store persistent data
-    db = MySQLHandler(os.environ['MYSQL_USER'], os.environ['MYSQL_PASSWORD'], os.environ['MYSQL_HOST'], os.environ['MYSQL_DATABASE'])
     add_job = ("INSERT INTO Job "
                "(description, kind, label, status, user, id, task, model, dataSample, dataSource) "
                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")

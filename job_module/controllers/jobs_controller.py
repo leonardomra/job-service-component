@@ -4,14 +4,17 @@ import os
 import uuid
 import time
 import json
+import jwt
 from flask import jsonify
 from job_module.models.job import Job  # noqa: E501
 from job_module import util
 from dbhandler.mysql_handler import MySQLHandler
+from urhandler.user_handler import UserHandler
 from orcomm_module.orevent import OREvent 
 from orcomm_module.orcommunicator import ORCommunicator
 
 db = MySQLHandler(os.environ['MYSQL_USER'], os.environ['MYSQL_PASSWORD'], os.environ['MYSQL_HOST'], os.environ['MYSQL_DATABASE'])
+ur = UserHandler(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'], db)
 orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
 orcomm.addTopic(os.environ['JOBS_NAME_TOPIC'], os.environ['JOBS_ARN_TOPIC'])
 
@@ -138,6 +141,18 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         status = 'waiting'
     job.status = status
     
+    # get tocken
+    accessToken = connexion.request.headers['Authorization']
+    decodedAccessToken = jwt.decode(accessToken.replace('Bearer ', ''), verify=False)
+    userId = decodedAccessToken['sub']
+    username = decodedAccessToken['username']
+    
+    if userId != job.user:
+        return '"user" parameter is invalid. Your id is: ' + userId, 400 
+
+    # check user registration
+    ur.storeUserInDB(userId, os.environ['AWS_USERPOOL_ID'], username)
+
     # validate job task
     if job.task == 'train':
         # requires job.data_source

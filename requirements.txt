@@ -17,8 +17,8 @@ MarkupSafe==1.1.1
 mysql-connector-python==8.0.21
 openapi-spec-validator==0.2.8
 protobuf==3.12.2
+PyJWT==1.7.1
 python-dateutil==2.6.0
-python-decouple==3.3
 python-dotenv==0.14.0
 PyYAML==5.3.1
 requests==2.24.0
@@ -27,4 +27,3 @@ six==1.15.0
 swagger-ui-bundle==0.0.8
 urllib3==1.25.9
 Werkzeug==1.0.1
-setuptools >= 21.0.0

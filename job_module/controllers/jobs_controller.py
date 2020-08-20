@@ -79,7 +79,7 @@ def jobs_id_put(id, label=None, description=None, status=None, output=None):  # 
     return 'do some magic!'
 
 
-def jobs_post(label=None, kind=None, task=None, user=None, description=None, model=None, data_source=None, data_sample=None, status=None, date_created=None, date_modified=None):
+def jobs_post(label=None, kind=None, task=None, user=None, description=None, model=None, data_source=None, data_sample=None, status=None, task_params=None, date_created=None, date_modified=None):
     """jobs_post
 
     Create a new job. # noqa: E501
@@ -140,6 +140,12 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     except Exception:
         status = 'waiting'
     job.status = status
+    try:
+        task_params = json.loads(connexion.request.headers['taskParams'])
+        job.task_params =  json.dumps(task_params)
+    except Exception:
+        job.task_params =  json.dumps({})
+    
     
     # get tocken
     accessToken = connexion.request.headers['Authorization']

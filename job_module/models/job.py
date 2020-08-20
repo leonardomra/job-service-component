@@ -14,7 +14,7 @@ class Job(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, user: str=None, label: str=None, description: str=None, kind: str=None, model: str=None, data_source: str=None, data_sample: str=None, status: str=None, output: str=None, date_created: datetime=None, date_modified: datetime=None):  # noqa: E501
+    def __init__(self, id: str=None, user: str=None, label: str=None, description: str=None, kind: str=None, model: str=None, data_source: str=None, data_sample: str=None, status: str=None, output: str=None, task_params: str=None, date_created: datetime=None, date_modified: datetime=None):  # noqa: E501
         """Job - a model defined in Swagger
 
         :param id: The id of this Job.  # noqa: E501
@@ -53,6 +53,7 @@ class Job(Model):
             'data_sample': str,
             'status': str,
             'output': str,
+            'task_params': str, 
             'date_created': datetime,
             'date_modified': datetime
         }
@@ -68,6 +69,7 @@ class Job(Model):
             'data_sample': 'dataSample',
             'status': 'status',
             'output': 'output',
+            'task_params': 'taskParams',  
             'date_created': 'dateCreated',
             'date_modified': 'dateModified'
         }
@@ -81,6 +83,7 @@ class Job(Model):
         self._data_sample = data_sample
         self._status = status
         self._output = output
+        self._task_params = task_params
         self._date_created = date_created
         self._date_modified = date_modified
 
@@ -314,6 +317,27 @@ class Job(Model):
         """
 
         self._output = output
+
+    @property
+    def task_params(self) -> str:
+        """Gets the output of this Job.
+
+
+        :return: The output of this Job.
+        :rtype: str
+        """
+        return self._task_params
+
+    @task_params.setter
+    def task_params(self, task_params: str):
+        """Sets the output of this Job.
+
+
+        :param output: The output of this Job.
+        :type output: str
+        """
+
+        self._task_params = task_params
 
     @property
     def date_created(self) -> datetime:

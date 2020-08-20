@@ -193,6 +193,13 @@ paths:
           enum:
           - train
           - analyse
+      - name: taskParams
+        in: header
+        description: 'Parameters of AI Task'
+        required: false
+        schema:
+          type: string
+          example: "{ param01: val, param02: val }"
       - name: user
         in: header
         description: Id of user.
@@ -311,6 +318,13 @@ paths:
           type: string
           format: uuid
           example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+      - name: taskParams
+        in: header
+        description: 'Parameters of AI Task'
+        required: false
+        schema:
+          type: string
+          example: "{ param01: val, param02: val }"
       responses:
         "200":
           description: Success
@@ -397,6 +411,9 @@ components:
           type: string
           format: uuid
           example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+        taskParams:
+          type: string
+          example: "{ param01: val, param02: val }"
         dateCreated:
           type: string
           format: date-time

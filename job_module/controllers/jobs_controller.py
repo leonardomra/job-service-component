@@ -58,7 +58,7 @@ def jobs_id_get(id):  # noqa: E501
     return 'do some magic!'
 
 
-def jobs_id_put(id, label=None, description=None, status=None, output=None):  # noqa: E501
+def jobs_id_put(id, label=None, description=None, status=None, output=None, task_params=None):  # noqa: E501
     """jobs_id_put
 
     Modify a new job. # noqa: E501
@@ -175,9 +175,9 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
 
     # store persistent data
     add_job = ("INSERT INTO Job "
-               "(description, kind, label, status, user, id, task, model, dataSample, dataSource) "
-               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
-    data_job = (job.description, job.kind, job.label, job.status, job.user, job.id, job.task, job.model, job.data_sample, job.data_source)
+               "(description, kind, label, status, user, id, task, model, dataSample, dataSource, taskParams) "
+               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+    data_job = (job.description, job.kind, job.label, job.status, job.user, job.id, job.task, job.model, job.data_sample, job.data_source, job.task_params)
     db.add(add_job, data_job)
     
     # create event

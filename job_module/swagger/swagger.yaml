@@ -30,7 +30,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
       x-openapi-router-controller: job_module.controllers.default_controller
-  /topic/confirm:  
+  /jobs/topic/confirm:  
     post:
       description: Check health of subscription.
       operationId: topic_confirm_post

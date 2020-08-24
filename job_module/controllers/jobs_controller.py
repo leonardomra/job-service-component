@@ -18,7 +18,6 @@ ur = UserHandler(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.envi
 orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
 orcomm.addTopic(os.environ['JOBS_NAME_TOPIC'], os.environ['JOBS_ARN_TOPIC'])
 
-
 def jobs_get(limit=None):  # noqa: E501
     """jobs_get
 
@@ -122,16 +121,22 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         pass
     try:
         model = connexion.request.headers['model']
+        if model == '':
+            model = None
         job.model = model
     except Exception:
         pass
     try:
         data_source = connexion.request.headers['dataSource']
+        if data_source == '':
+            data_source = None
         job.data_source = data_source
     except Exception:
         pass
     try:
         data_sample = connexion.request.headers['dataSample']
+        if data_sample == '':
+            data_sample = None
         job.data_sample = data_sample
     except Exception:
         pass

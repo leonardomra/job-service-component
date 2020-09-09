@@ -28,10 +28,40 @@ def jobs_get(limit=None):  # noqa: E501
 
     :rtype: List[Job]
     """
-    return 'jobs'
+
+    # get tocken
+    accessToken = connexion.request.headers['Authorization']
+    decodedAccessToken = jwt.decode(accessToken.replace('Bearer ', ''), verify=False)
+    userId = decodedAccessToken['sub']
+
+    # get jobs
+    checkJobQuery = ("SELECT id, label, description, kind, status, user, model, dataSource, dataSample, output, dateCreated, dateModified, task, taskParams FROM Job WHERE user = %s")
+    params1 = (userId,)
+    results = db.get(checkJobQuery, params1)
+    
+    jobs = []
+    for result in results:
+        job = Job()
+        job.id = result[0]
+        job.label = result[1]
+        job.description = result[2]
+        job.kind = result[3]
+        job.status = result[4]
+        job.user = result[5]
+        job.model = result[6]
+        job.data_source = result[7]
+        job.data_sample = result[8]
+        job.output = result[9]
+        job.date_created = result[10]
+        job.date_modified = result[11]
+        job.task = result[12]
+        job.task_params = result[13]
+        jobs.append(job)
+
+    return jobs
 
 
-def jobs_id_delete(id):  # noqa: E501
+def jobs_id_delete(id_ = None):  # noqa: E501
     """jobs_id_delete
 
     Delete a job. # noqa: E501
@@ -41,10 +71,16 @@ def jobs_id_delete(id):  # noqa: E501
 
     :rtype: Job
     """
-    return 'do some magic!'
+
+    # get tocken
+    accessToken = connexion.request.headers['Authorization']
+    decodedAccessToken = jwt.decode(accessToken.replace('Bearer ', ''), verify=False)
+    userId = decodedAccessToken['sub']
+
+    return db.delete('Job', id_, userId) 
 
 
-def jobs_id_get(id):  # noqa: E501
+def jobs_id_get(id_ = None):  # noqa: E501
     """jobs_id_get
 
     Obtain information about a specific job. # noqa: E501
@@ -54,10 +90,43 @@ def jobs_id_get(id):  # noqa: E501
 
     :rtype: Job
     """
-    return 'do some magic!'
+
+    # get tocken
+    accessToken = connexion.request.headers['Authorization']
+    decodedAccessToken = jwt.decode(accessToken.replace('Bearer ', ''), verify=False)
+    userId = decodedAccessToken['sub']
+
+    # get jobs
+    checkJobQuery = ("SELECT id, label, description, kind, status, user, model, dataSource, dataSample, output, dateCreated, dateModified, task, taskParams FROM Job WHERE user = %s and id = %s")
+    params1 = (userId, id_)
+    results = db.get(checkJobQuery, params1)
+
+    jobs = []
+    for result in results:
+        job = Job()
+        job.id = result[0]
+        job.label = result[1]
+        job.description = result[2]
+        job.kind = result[3]
+        job.status = result[4]
+        job.user = result[5]
+        job.model = result[6]
+        job.data_source = result[7]
+        job.data_sample = result[8]
+        job.output = result[9]
+        job.date_created = result[10]
+        job.date_modified = result[11]
+        job.task = result[12]
+        job.task_params = result[13]
+        jobs.append(job)
+    
+    try:
+        return jobs[0]
+    except Exception as e:
+        return e.args[0], 400
 
 
-def jobs_id_put(id, label=None, description=None, status=None, output=None, task_params=None):  # noqa: E501
+def jobs_id_put(id_=None, label=None, description=None, status=None, output=None, task_params=None):  # noqa: E501
     """jobs_id_put
 
     Modify a new job. # noqa: E501
@@ -75,7 +144,17 @@ def jobs_id_put(id, label=None, description=None, status=None, output=None, task
 
     :rtype: Job
     """
-    return 'do some magic!'
+
+    # get tocken
+    accessToken = connexion.request.headers['Authorization']
+    decodedAccessToken = jwt.decode(accessToken.replace('Bearer ', ''), verify=False)
+    userId = decodedAccessToken['sub']
+
+    updateJobQuery = ('UPDATE Job SET label = %s, description = %s WHERE id = %s and user = %s')
+    params2 = ( connexion.request.headers['label'],  connexion.request.headers['description'], id_, userId)
+    db.update(updateJobQuery, params2)
+
+    return 'This endpoint will be implemented soon.'
 
 
 def jobs_post(label=None, kind=None, task=None, user=None, description=None, model=None, data_source=None, data_sample=None, status=None, task_params=None, date_created=None, date_modified=None):

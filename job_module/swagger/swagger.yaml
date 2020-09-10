@@ -18,10 +18,17 @@ info:
 #- url: https://virtserver.swaggerhub.com/openresearch/job-ai/1.0.0
 #  description: SwaggerHub API Auto Mocking
 paths:
+<<<<<<< HEAD
   /health:
     get:
       description: 'Check health of service.'
       operationId: health_get
+=======
+  /jobs/health:
+    get:
+      description: 'Check health of service.'
+      operationId: jobs_health_get
+>>>>>>> development
       responses:
         "200":
           description: Success
@@ -30,9 +37,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
       x-openapi-router-controller: job_module.controllers.default_controller
+<<<<<<< HEAD
     post:
       description: Check health of subscription.
       operationId: health_post
+=======
+  /jobs/topic/confirm:  
+    post:
+      description: Check health of subscription.
+      operationId: topic_confirm_post
+>>>>>>> development
       parameters:
       - name: x_amz_sns_message_type
         in: header
@@ -192,6 +206,13 @@ paths:
           enum:
           - train
           - analyse
+      - name: taskParams
+        in: header
+        description: 'Parameters of AI Task'
+        required: false
+        schema:
+          type: string
+          example: "{ param01: val, param02: val }"
       - name: user
         in: header
         description: Id of user.
@@ -310,6 +331,16 @@ paths:
           type: string
           format: uuid
           example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+<<<<<<< HEAD
+=======
+      - name: taskParams
+        in: header
+        description: 'Parameters of AI Task'
+        required: false
+        schema:
+          type: string
+          example: "{ param01: val, param02: val }"
+>>>>>>> development
       responses:
         "200":
           description: Success
@@ -396,6 +427,12 @@ components:
           type: string
           format: uuid
           example: 4baa97f6-c10f-11ea-b3de-0242ac130004
+<<<<<<< HEAD
+=======
+        taskParams:
+          type: string
+          example: "{ param01: val, param02: val }"
+>>>>>>> development
         dateCreated:
           type: string
           format: date-time

@@ -2,16 +2,17 @@ import connexion
 import sys
 import six
 import json
-
+import os
 from job_module.models.health import Health  # noqa: E501
 from job_module import util
-from job_module.communication.topic import Topic
 from flask import jsonify
+from orcomm_module.orcommunicator import ORCommunicator
 
-topicSNS = Topic()
+orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
+orcomm.addTopic(os.environ['JOBS_NAME_TOPIC'], os.environ['JOBS_ARN_TOPIC'])
 
-def health_get():  # noqa: E501
-    """health_get
+def jobs_health_get():  # noqa: E501
+    """jobs_health_get
 
     Check health of service. # noqa: E501
 
@@ -24,8 +25,8 @@ def health_get():  # noqa: E501
     print('Heatlh check executed.', flush=True)
     return jsonify(response)
 
-def health_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=None, x_amz_sns_topic_arn=None):  # noqa: E501
-    """health_post
+def topic_confirm_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=None, x_amz_sns_topic_arn=None):  # noqa: E501
+    """topic_confirm_post
 
     Check health of subscription. # noqa: E501
 
@@ -40,14 +41,16 @@ def health_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=Non
 
     :rtype: Health
     """
-    if connexion.request.is_json:
-        body = object.from_dict(connexion.request.get_json())  # noqa: E501
+
+    if not connexion.request.is_json:
+        body = json.loads(body)
+        if 'Message' in body:
+            try:
+                body['Message'] = json.loads(body['Message'])
+            except json.decoder.JSONDecodeError:
+                print('Message cannot be converted into JSON')
+    response = orcomm.getTopic(os.environ['JOBS_ARN_TOPIC']).tuneTopic(connexion.request.headers, body)
+    if response.Type == 'SubscriptionConfirmation':
+        return orcomm.getTopic(os.environ['JOBS_ARN_TOPIC']).confirmSubscription(response)
     else:
-        body =  json.loads(body)
-    response = {
-        "status" : body
-    }
-    print(body, flush=True)
-    x_amz_sns_message_id = connexion.request.headers['x_amz_sns_message_id']
-    x_amz_sns_topic_arn = connexion.request.headers['x_amz_sns_topic_arn']
-    return topicSNS.confirmSubscription(body['TopicArn'], body['Token'])
+        return 'bad request!', 400

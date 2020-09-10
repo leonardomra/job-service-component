@@ -1,4 +1,5 @@
 import mysql.connector
+from mysql.connector import errorcode, Error
 
 class MySQLHandler():
     
@@ -41,3 +42,32 @@ class MySQLHandler():
         self.cursor.execute(schema, data)
         self.cnx.commit()
         self.dbCloseConnection()
+
+    def get(self, query, params=None):
+        self.dbconnect()
+        self.cursor.execute(query, params)
+        records = self.cursor.fetchall()
+        self.dbCloseConnection()
+        return records
+
+    def update(self, query, params=None):
+        self.dbconnect()
+        self.cursor.execute(query, params)
+        self.cnx.commit()
+        self.dbCloseConnection()
+
+    def delete(self, table, id, user):
+        query = "DELETE FROM " + table + " WHERE id=%s and user=%s"
+        params = (id, user)
+        response = False
+        try:
+            self.dbconnect()
+            self.cursor.execute(query, params)
+            self.cnx.commit()
+            response = True
+        except Error as error:
+            print(error, flush=True)
+        finally:
+            self.dbCloseConnection()
+        return response
+        

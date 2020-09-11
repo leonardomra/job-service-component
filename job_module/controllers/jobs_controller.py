@@ -183,14 +183,15 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
 
     :rtype: Job
     """
+
     job = Job()
     job.id = str(uuid.uuid4())
     label = connexion.request.headers['label']
     job.label = label
     kind = connexion.request.headers['kind']
     job.kind = kind
-    user = connexion.request.headers['user']
-    job.user = user
+    #user = connexion.request.headers['user']
+    #job.user = user
     task = connexion.request.headers['task']
     job.task = task
     try:
@@ -236,9 +237,9 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     decodedAccessToken = jwt.decode(accessToken.replace('Bearer ', ''), verify=False)
     userId = decodedAccessToken['sub']
     username = decodedAccessToken['username']
-    
-    if userId != job.user:
-        return '"user" parameter is invalid. Your id is: ' + userId, 400 
+    #if userId != job.user:
+    #    return '"user" parameter is invalid. Your id is: ' + userId, 400 
+    job.user = userId
 
     # check user registration
     ur.storeUserInDB(userId, os.environ['AWS_USERPOOL_ID'], username)
@@ -252,9 +253,9 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
             return 'For analysis jobs, a data source should be passed with correct UUID.', 406 
     elif job.task == 'analyse':
         # requires job.model & job.data_sample
-        if job.model is None or job.data_sample is None:
+        if (job.model is None or job.data_sample is None) and job.kind == 'tml':
             return 'For training jobs, a model and sample should be passed.', 406 
-        if not isValidUUID(job.model) or not isValidUUID(job.data_sample):
+        if (not isValidUUID(job.model) or not isValidUUID(job.data_sample)) and job.kind == 'tml':
             return 'For training jobs, a model and sample should be passed with correct UUID.', 406 
 
     # store persistent data

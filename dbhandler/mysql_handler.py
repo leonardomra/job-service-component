@@ -70,4 +70,3 @@ class MySQLHandler():
         finally:
             self.dbCloseConnection()
         return response
-        

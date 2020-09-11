@@ -8,6 +8,10 @@ from job_module import util
 from flask import jsonify
 from orcomm_module.orcommunicator import ORCommunicator
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 orcomm = ORCommunicator(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
 orcomm.addTopic(os.environ['JOBS_NAME_TOPIC'], os.environ['JOBS_ARN_TOPIC'])
 
@@ -24,6 +28,7 @@ def jobs_health_get():  # noqa: E501
     }
     print('Heatlh check executed.', flush=True)
     return jsonify(response)
+
 
 def topic_confirm_post(body=None, x_amz_sns_message_type=None, x_amz_sns_message_id=None, x_amz_sns_topic_arn=None):  # noqa: E501
     """topic_confirm_post

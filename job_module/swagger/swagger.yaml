@@ -203,7 +203,7 @@ paths:
       - name: user
         in: header
         description: Id of user.
-        required: true
+        required: false
         style: simple
         explode: false
         schema:

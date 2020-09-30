@@ -248,15 +248,17 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     if job.task == 'train':
         # requires job.data_source
         if job.data_source is None:
-            return 'For analysis jobs, a data source should be passed.', 406
+            return 'For training jobs, a data source should be passed.', 406
         if not isValidUUID(job.data_source):
-            return 'For analysis jobs, a data source should be passed with correct UUID.', 406 
+            return 'For training jobs, a data source should be passed with correct UUID.', 406 
+        if job.model is None and job.kind == 'qna':
+            return 'For QNA training jobs, a model for fine-tunning should be passed.', 406 
     elif job.task == 'analyse':
         # requires job.model & job.data_sample
-        if (job.model is None or job.data_sample is None) and job.kind == 'tml':
-            return 'For training jobs, a model and sample should be passed.', 406 
+        if (job.model is None or job.data_sample is None):
+            return 'For analysis jobs, a model and sample should be passed.', 406 
         if (not isValidUUID(job.model) or not isValidUUID(job.data_sample)) and job.kind == 'tml':
-            return 'For training jobs, a model and sample should be passed with correct UUID.', 406 
+            return 'For analysis jobs, a model and sample should be passed with correct UUID.', 406 
 
     # store persistent data
     add_job = ("INSERT INTO Job "

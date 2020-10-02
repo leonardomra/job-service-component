@@ -204,7 +204,11 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         if model == '':
             model = None
         job.model = model
-    except Exception:
+        mappings = json.loads(os.environ['DEFAULT_MODEL_MAPPINGS'])
+        for m in mappings:
+            if job.model == list(m.keys())[0]:
+                job.model = m[list(m.keys())[0]]
+    except Exception as e:
         pass
     try:
         data_source = connexion.request.headers['dataSource']
@@ -218,8 +222,13 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         if data_sample == '':
             data_sample = None
         job.data_sample = data_sample
+        mappings = json.loads(os.environ['DEFAULT_SAMPLES_MAPPINGS'])
+        for m in mappings:
+            if job.data_sample == list(m.keys())[0]:
+                job.data_sample = m[list(m.keys())[0]]
     except Exception:
         pass
+    print(job.data_sample, flush=True)
     try:
         status = connexion.request.headers['status']
     except Exception:

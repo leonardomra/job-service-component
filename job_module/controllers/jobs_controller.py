@@ -261,7 +261,7 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         if not isValidUUID(job.data_source):
             return 'For training jobs, a data source should be passed with correct UUID.', 406 
         if job.model is None and job.kind == 'qna':
-            return 'For QNA training jobs, a model for fine-tunning should be passed.', 406 
+            return 'For QNA training jobs, a model for fine-tunning should be passed.', 406
     elif job.task == 'analyse':
         # requires job.model & job.data_sample
         if (job.model is None or job.data_sample is None):

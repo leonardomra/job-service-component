@@ -151,6 +151,7 @@ paths:
           - tml
           - d2v
           - qna
+          - ner
       - name: model
         in: header
         description: Model of AI Task.

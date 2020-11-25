@@ -8,10 +8,10 @@ import jwt
 from flask import jsonify
 from job_module.models.job import Job  # noqa: E501
 from job_module import util
-from dbhandler.mysql_handler import MySQLHandler
-from urhandler.user_handler import UserHandler
-from orcomm_module.orevent import OREvent 
-from orcomm_module.orcommunicator import ORCommunicator
+from ordbhandler import MySQLHandler
+from orurhandler import UserHandler
+from orcommunicator.orevent import OREvent 
+from orcommunicator import ORCommunicator
 
 db = MySQLHandler(os.environ['MYSQL_USER'], os.environ['MYSQL_PASSWORD'], os.environ['MYSQL_HOST'], os.environ['MYSQL_DATABASE'])
 ur = UserHandler(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'], db)

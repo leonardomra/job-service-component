@@ -6,7 +6,7 @@ import os
 from job_module.models.health import Health  # noqa: E501
 from job_module import util
 from flask import jsonify
-from orcomm_module.orcommunicator import ORCommunicator
+from orcommunicator import ORCommunicator
 
 import smtplib
 from email.mime.multipart import MIMEMultipart

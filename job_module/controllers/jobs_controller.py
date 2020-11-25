@@ -8,10 +8,10 @@ import jwt
 from flask import jsonify
 from job_module.models.job import Job  # noqa: E501
 from job_module import util
-from dbhandler.mysql_handler import MySQLHandler
-from urhandler.user_handler import UserHandler
-from orcomm_module.orevent import OREvent 
-from orcomm_module.orcommunicator import ORCommunicator
+from ordbhandler import MySQLHandler
+from orurhandler import UserHandler
+from orcommunicator.orevent import OREvent 
+from orcommunicator import ORCommunicator
 
 db = MySQLHandler(os.environ['MYSQL_USER'], os.environ['MYSQL_PASSWORD'], os.environ['MYSQL_HOST'], os.environ['MYSQL_DATABASE'])
 ur = UserHandler(os.environ['AWS_REGION'], os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'], db)
@@ -183,14 +183,15 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
 
     :rtype: Job
     """
+
     job = Job()
     job.id = str(uuid.uuid4())
     label = connexion.request.headers['label']
     job.label = label
     kind = connexion.request.headers['kind']
     job.kind = kind
-    user = connexion.request.headers['user']
-    job.user = user
+    #user = connexion.request.headers['user']
+    #job.user = user
     task = connexion.request.headers['task']
     job.task = task
     try:
@@ -203,7 +204,11 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         if model == '':
             model = None
         job.model = model
-    except Exception:
+        mappings = json.loads(os.environ['DEFAULT_MODEL_MAPPINGS'])
+        for m in mappings:
+            if job.model == list(m.keys())[0]:
+                job.model = m[list(m.keys())[0]]
+    except Exception as e:
         pass
     try:
         data_source = connexion.request.headers['dataSource']
@@ -217,8 +222,13 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         if data_sample == '':
             data_sample = None
         job.data_sample = data_sample
+        mappings = json.loads(os.environ['DEFAULT_SAMPLES_MAPPINGS'])
+        for m in mappings:
+            if job.data_sample == list(m.keys())[0]:
+                job.data_sample = m[list(m.keys())[0]]
     except Exception:
         pass
+    print(job.data_sample, flush=True)
     try:
         status = connexion.request.headers['status']
     except Exception:
@@ -236,9 +246,9 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     decodedAccessToken = jwt.decode(accessToken.replace('Bearer ', ''), verify=False)
     userId = decodedAccessToken['sub']
     username = decodedAccessToken['username']
-    
-    if userId != job.user:
-        return '"user" parameter is invalid. Your id is: ' + userId, 400 
+    #if userId != job.user:
+    #    return '"user" parameter is invalid. Your id is: ' + userId, 400 
+    job.user = userId
 
     # check user registration
     ur.storeUserInDB(userId, os.environ['AWS_USERPOOL_ID'], username)
@@ -247,15 +257,17 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     if job.task == 'train':
         # requires job.data_source
         if job.data_source is None:
-            return 'For analysis jobs, a data source should be passed.', 406
+            return 'For training jobs, a data source should be passed.', 406
         if not isValidUUID(job.data_source):
-            return 'For analysis jobs, a data source should be passed with correct UUID.', 406 
+            return 'For training jobs, a data source should be passed with correct UUID.', 406 
+        if job.model is None and job.kind == 'qna':
+            return 'For QNA training jobs, a model for fine-tunning should be passed.', 406
     elif job.task == 'analyse':
         # requires job.model & job.data_sample
-        if job.model is None or job.data_sample is None:
-            return 'For training jobs, a model and sample should be passed.', 406 
-        if not isValidUUID(job.model) or not isValidUUID(job.data_sample):
-            return 'For training jobs, a model and sample should be passed with correct UUID.', 406 
+        if (job.model is None or job.data_sample is None):
+            return 'For analysis jobs, a model and sample should be passed.', 406 
+        if (not isValidUUID(job.model) or not isValidUUID(job.data_sample)) and job.kind == 'tml':
+            return 'For analysis jobs, a model and sample should be passed with correct UUID.', 406 
 
     # store persistent data
     add_job = ("INSERT INTO Job "

@@ -48,3 +48,7 @@ docker build -t job_module .
 docker run --env-file=.env -p 8080:8080 job_module
 ```
 
+## Virtual Environment
+
+python3 -m venv my-env
+source my-env/bin/activate

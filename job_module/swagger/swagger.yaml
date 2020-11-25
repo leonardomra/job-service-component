@@ -164,6 +164,7 @@ paths:
           - tml
           - d2v
           - qna
+          - ner
       - name: model
         in: header
         description: Model of AI Task.
@@ -216,7 +217,7 @@ paths:
       - name: user
         in: header
         description: Id of user.
-        required: true
+        required: false
         style: simple
         explode: false
         schema:

@@ -9,7 +9,8 @@ from flask import jsonify
 from job_module.models.job import Job  # noqa: E501
 from job_module import util
 from ordbhandler import MySQLHandler
-from orurhandler import UserHandler
+#from orurhandler import UserHandler
+from _orurhandler.user_handler import UserHandler
 from orcommunicator.orevent import OREvent 
 from orcommunicator import ORCommunicator
 
@@ -183,15 +184,12 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
 
     :rtype: Job
     """
-
     job = Job()
     job.id = str(uuid.uuid4())
     label = connexion.request.headers['label']
     job.label = label
     kind = connexion.request.headers['kind']
     job.kind = kind
-    #user = connexion.request.headers['user']
-    #job.user = user
     task = connexion.request.headers['task']
     job.task = task
     try:
@@ -208,7 +206,7 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         for m in mappings:
             if job.model == list(m.keys())[0]:
                 job.model = m[list(m.keys())[0]]
-    except Exception as e:
+    except Exception:
         pass
     try:
         data_source = connexion.request.headers['dataSource']
@@ -228,7 +226,6 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
                 job.data_sample = m[list(m.keys())[0]]
     except Exception:
         pass
-    print(job.data_sample, flush=True)
     try:
         status = connexion.request.headers['status']
     except Exception:
@@ -239,20 +236,25 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
         job.task_params =  json.dumps(task_params)
     except Exception:
         job.task_params =  json.dumps({})
-    
-    
     # get tocken
     accessToken = connexion.request.headers['Authorization']
     decodedAccessToken = jwt.decode(accessToken.replace('Bearer ', ''), verify=False)
-    userId = decodedAccessToken['sub']
-    username = decodedAccessToken['username']
-    #if userId != job.user:
-    #    return '"user" parameter is invalid. Your id is: ' + userId, 400 
+    userId = None
+    username = None
+    try:
+        userId = decodedAccessToken['sub']
+        username = decodedAccessToken['username']
+        # check user registration
+        ur.storeUserInDB(userId, os.environ['AWS_USERPOOL_ID'], username)
+    except Exception:
+        try:
+            userId = str(uuid.uuid5(uuid.NAMESPACE_OID, task_params['environment']))
+            username = task_params['environment']
+            # check user registration
+            ur.storeUserInDB(userId, os.environ['AWS_USERPOOL_ID'], username, decodedAccessToken['sub'], 's2s', decodedAccessToken['sub'] + '@s2s.app')
+        except Exception:
+            return 'For Server2Server transactions, the environment id needs to be sent via taskParams. Example: { "environment" : environmentId }', 400
     job.user = userId
-
-    # check user registration
-    ur.storeUserInDB(userId, os.environ['AWS_USERPOOL_ID'], username)
-
     # validate job task
     if job.task == 'train':
         # requires job.data_source
@@ -268,14 +270,12 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
             return 'For analysis jobs, a model and sample should be passed.', 406 
         if (not isValidUUID(job.model) or not isValidUUID(job.data_sample)) and job.kind == 'tml':
             return 'For analysis jobs, a model and sample should be passed with correct UUID.', 406 
-
     # store persistent data
     add_job = ("INSERT INTO Job "
                "(description, kind, label, status, user, id, task, model, dataSample, dataSource, taskParams) "
                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
     data_job = (job.description, job.kind, job.label, job.status, job.user, job.id, job.task, job.model, job.data_sample, job.data_source, job.task_params)
     db.add(add_job, data_job)
-    
     # create event
     jobDict = job.__dict__.copy()
     del jobDict['swagger_types']
@@ -285,7 +285,6 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
     event.Subject = 'Send Job'
     event.Message = json.dumps(jobDict)
     response = orcomm.getTopic(os.environ['JOBS_ARN_TOPIC']).broadcastEvent(event)
-
     # response
     return response
 

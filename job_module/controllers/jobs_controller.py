@@ -251,7 +251,7 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
             userId = str(uuid.uuid5(uuid.NAMESPACE_OID, task_params['environment']))
             username = task_params['environment']
             # check user registration
-            ur.storeUserInDB(userId, os.environ['AWS_USERPOOL_ID'], username, decodedAccessToken['sub'], 's2s', decodedAccessToken['sub'] + '@s2s.app')
+            ur.storeUserInDB(userId, os.environ['AWS_USERPOOL_ID'], username, decodedAccessToken['sub'], 's2s', decodedAccessToken['sub'] + '@s2s.environment')
         except Exception:
             return 'For Server2Server transactions, the environment id needs to be sent via taskParams. Example: { "environment" : environmentId }', 400
     job.user = userId
@@ -266,7 +266,7 @@ def jobs_post(label=None, kind=None, task=None, user=None, description=None, mod
             return 'For QNA training jobs, a model for fine-tunning should be passed.', 406
     elif job.task == 'analyse':
         # requires job.model & job.data_sample
-        if (job.model is None or job.data_sample is None):
+        if ((job.model is None or job.data_sample is None) and job.kind != 'adm'):
             return 'For analysis jobs, a model and sample should be passed.', 406 
         if (not isValidUUID(job.model) or not isValidUUID(job.data_sample)) and job.kind == 'tml':
             return 'For analysis jobs, a model and sample should be passed with correct UUID.', 406 

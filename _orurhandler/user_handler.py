@@ -21,7 +21,6 @@ class UserHandler():
         )
 
     def storeUserInDB(self, userId, userPoolId, username, firstName = None, lastName = None, email = None):
-        print(userId, userPoolId, username, firstName, lastName, email)
         checkUserQuery = ("SELECT id, firstName, lastName, username, email, active FROM User WHERE id = %s")
         params = (userId,)
         results = self.db.get(checkUserQuery, params)
@@ -36,18 +35,14 @@ class UserHandler():
                         user['active'] = attribute['Value'] == 'true'
                     elif attribute['Name'] == 'email':
                         user['email'] = attribute['Value']
-            except Exception as e:
-                print(e)
+            except Exception:   
                 user['id'] = userId
                 user['active'] = 1
                 user['email'] = email
                 user['firstName'] = firstName
                 user['lastName'] = lastName
-                print(user, username)
             addUser = ("INSERT INTO User "
                         "(id, email, active, username, firstName, lastName) "
                         "VALUES (%s, %s, %s, %s, %s, %s)")
             dataUser = (user['id'], user['email'], user['active'], username, user['firstName'], user['lastName'])
-            print('will do')
             self.db.add(addUser, dataUser)
-            print('did')
